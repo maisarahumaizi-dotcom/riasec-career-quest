@@ -1,0 +1,3231 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>RIASEC CAREER QUEST - Play • Discover • Explore</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            riasecR: '#EF4444',
+            riasecI: '#3B82F6',
+            riasecA: '#10B981',
+            riasecS: '#F59E0B',
+            riasecE: '#8B5CF6',
+            riasecC: '#EC4899',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #1e1b4b 50%,
+        #0f172a 100%
+      );
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dice-roll-anim {
+      animation: spinDice 0.6s cubic-bezier(
+        0.175,
+        0.885,
+        0.32,
+        1.275
+      );
+    }
+
+    @keyframes spinDice {
+      0% {
+        transform: rotate(0deg) scale(0.5);
+      }
+
+      50% {
+        transform: rotate(180deg) scale(1.3);
+      }
+
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+
+    .tile-active {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+      transform: scale(1.05);
+      z-index: 10;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.5);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- APP CONTAINER -->
+  <div
+    id="app"
+    class="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-6 flex flex-col justify-center"
+  >
+
+    <!-- HEADER -->
+    <header class="glass-panel rounded-2xl p-4 mb-6 flex justify-between items-center shadow-2xl">
+
+      <div class="flex items-center space-x-3">
+
+        <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl shadow-lg">
+          <i data-lucide="gamepad-2" class="w-6 h-6 text-white"></i>
+        </div>
+
+        <div>
+          <h1 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+            RIASEC CAREER QUEST
+          </h1>
+
+          <p class="text-xs text-slate-400 font-medium">
+            Play • Discover • Explore
+          </p>
+        </div>
+
+      </div>
+
+      <div
+        id="playerBadge"
+        class="hidden flex items-center space-x-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-full text-xs sm:text-sm"
+      >
+        <i data-lucide="user" class="w-4 h-4 text-indigo-400"></i>
+
+        <span
+          id="badgeName"
+          class="font-semibold text-slate-200"
+        >
+          Pemain
+        </span>
+
+        <span
+          id="badgeForm"
+          class="text-slate-400 text-xs hidden sm:inline"
+        ></span>
+      </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+    <main class="flex-1 flex flex-col">
+
+
+      <!-- =========================================================
+           SCREEN 1 - START
+      ========================================================== -->
+
+      <section
+        id="screenStart"
+        class="glass-panel rounded-3xl p-6 sm:p-10 my-auto shadow-2xl transition-all duration-300"
+      >
+
+        <div class="max-w-xl mx-auto text-center space-y-6">
+
+          <div class="inline-flex p-4 bg-indigo-500/10 rounded-3xl border border-indigo-500/20 mb-2">
+            <i
+              data-lucide="compass"
+              class="w-16 h-16 text-indigo-400 animate-pulse"
+            ></i>
+          </div>
+
+          <div class="space-y-2">
+
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+              Sertai Pengembaraan Kerjaya!
+            </h2>
+
+            <p class="text-sm sm:text-base text-slate-300">
+              Terokai minat dan potensi diri anda melalui permainan papan
+              digital interaktif berdasarkan model kecenderungan kerjaya
+              <strong>RIASEC</strong>.
+            </p>
+
+          </div>
+
+
+          <form
+            id="startForm"
+            onsubmit="handleStartGame(event)"
+            class="space-y-4 text-left pt-4"
+          >
+
+            <!-- NAME -->
+
+            <div>
+
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                Nama / Nickname
+                <span class="text-pink-400">*</span>
+              </label>
+
+              <div class="relative">
+
+                <i
+                  data-lucide="user"
+                  class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                ></i>
+
+                <input
+                  type="text"
+                  id="playerName"
+                  required
+                  placeholder="Contoh: Amirul / Sarah"
+                  class="w-full bg-slate-900/80 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 transition-all"
+                >
+
+              </div>
+
+            </div>
+
+
+            <!-- AGE / FORM -->
+
+            <div>
+
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                Umur / Tingkatan
+                <span class="text-slate-400 text-xs font-normal">
+                  (Opsional)
+                </span>
+              </label>
+
+              <div class="relative">
+
+                <i
+                  data-lucide="graduation-cap"
+                  class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                ></i>
+
+                <input
+                  type="text"
+                  id="playerForm"
+                  placeholder="Contoh: Tingkatan 4 / 16 Tahun"
+                  class="w-full bg-slate-900/80 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 transition-all"
+                >
+
+              </div>
+
+            </div>
+
+
+            <!-- START BUTTON -->
+
+            <button
+              type="submit"
+              class="w-full group mt-6 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+
+              <i
+                data-lucide="play"
+                class="w-5 h-5 fill-current"
+              ></i>
+
+              <span class="text-base">
+                START GAME
+              </span>
+
+            </button>
+
+          </form>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =========================================================
+           SCREEN 2 - BOARD GAME
+      ========================================================== -->
+
+      <section
+        id="screenBoard"
+        class="hidden flex-1 flex flex-col space-y-6"
+      >
+
+        <!-- BOARD CONTROLS -->
+
+        <div
+          class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xl"
+        >
+
+          <div class="flex items-center space-x-4">
+
+            <div class="flex flex-col">
+
+              <span class="text-xs font-semibold text-slate-400">
+                PETA LOKASI
+              </span>
+
+              <span
+                id="currentTileLabel"
+                class="text-sm font-bold text-indigo-300"
+              >
+                START
+              </span>
+
+            </div>
+
+            <div class="h-8 w-px bg-slate-700"></div>
+
+            <div class="flex flex-col">
+
+              <span class="text-xs font-semibold text-slate-400">
+                KEMAJUAN BOARD
+              </span>
+
+              <span
+                id="turnsCount"
+                class="text-sm font-bold text-amber-400"
+              >
+                Petak: 0 / 23
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- DICE -->
+
+          <div class="flex items-center space-x-4">
+
+            <div
+              id="diceDisplay"
+              class="w-12 h-12 bg-slate-900 border-2 border-indigo-500/50 rounded-xl flex items-center justify-center text-xl font-black text-indigo-400 shadow-inner"
+            >
+              🎲
+            </div>
+
+            <button
+              id="btnRollDice"
+              onclick="rollDice()"
+              class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg shadow-teal-600/30 flex items-center space-x-2 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+
+              <i data-lucide="dices" class="w-5 h-5"></i>
+
+              <span>
+                ROLL DICE
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- BOARD -->
+
+        <div
+          class="glass-panel rounded-3xl p-4 sm:p-6 flex-1 flex flex-col justify-center shadow-2xl"
+        >
+
+          <div
+            id="boardGrid"
+            class="grid grid-cols-4 sm:grid-cols-6 gap-2 sm:gap-3 w-full"
+          >
+          </div>
+
+        </div>
+
+
+        <!-- SCORE TRACKER -->
+
+        <div
+          class="glass-panel rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-around gap-2 text-xs font-bold shadow-lg"
+        >
+
+          <span
+            class="text-slate-400 uppercase tracking-wider text-[10px] w-full text-center sm:w-auto"
+          >
+            Skor Semasa:
+          </span>
+
+          <div class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30">
+            <span>🔧 R:</span>
+            <span id="scoreR">0</span>
+          </div>
+
+          <div class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30">
+            <span>🔎 I:</span>
+            <span id="scoreI">0</span>
+          </div>
+
+          <div class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span>🎨 A:</span>
+            <span id="scoreA">0</span>
+          </div>
+
+          <div class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span>🤝 S:</span>
+            <span id="scoreS">0</span>
+          </div>
+
+          <div class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30">
+            <span>💼 E:</span>
+            <span id="scoreE">0</span>
+          </div>
+
+          <div class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/30">
+            <span>📋 C:</span>
+            <span id="scoreC">0</span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =========================================================
+           SCREEN 3 - RESULTS
+      ========================================================== -->
+
+      <section
+        id="screenResults"
+        class="hidden flex-1 flex flex-col space-y-6"
+      >
+
+        <!-- CELEBRATION -->
+
+        <div
+          class="glass-panel rounded-3xl p-6 sm:p-8 text-center bg-gradient-to-r from-indigo-900/60 via-purple-900/60 to-slate-900/60 shadow-2xl relative overflow-hidden"
+        >
+
+          <div class="absolute -right-10 -top-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div
+            class="inline-flex p-3 bg-amber-500/20 rounded-2xl mb-3 text-amber-300 border border-amber-500/30"
+          >
+
+            <i data-lucide="trophy" class="w-10 h-10"></i>
+
+          </div>
+
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">
+            🎉 TAHNIAH!
+          </h2>
+
+          <p class="text-slate-300 text-sm sm:text-base max-w-lg mx-auto">
+
+            Syabas
+            <span
+              id="resPlayerName"
+              class="text-indigo-300 font-bold"
+            ></span>!
+
+            Anda telah menyelesaikan Career Quest dan profil kecenderungan
+            RIASEC anda telah berjaya dijana.
+
+          </p>
+
+        </div>
+
+
+        <!-- CHART + SCORES -->
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+          <!-- CHART -->
+
+          <div
+            class="glass-panel rounded-3xl p-5 flex flex-col justify-between shadow-xl"
+          >
+
+            <h3 class="font-bold text-lg text-slate-100 mb-4 flex items-center space-x-2">
+
+              <i
+                data-lucide="bar-chart-3"
+                class="w-5 h-5 text-indigo-400"
+              ></i>
+
+              <span>
+                PROFIL RIASEC ANDA
+              </span>
+
+            </h3>
+
+            <div
+              class="relative w-full h-64 flex items-center justify-center"
+            >
+
+              <canvas id="riasecChart"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <!-- SCORE TABLE -->
+
+          <div
+            class="glass-panel rounded-3xl p-5 flex flex-col justify-between shadow-xl"
+          >
+
+            <h3
+              class="font-bold text-lg text-slate-100 mb-4 flex items-center justify-between"
+            >
+
+              <span class="flex items-center space-x-2">
+
+                <i
+                  data-lucide="list-ordered"
+                  class="w-5 h-5 text-indigo-400"
+                ></i>
+
+                <span>
+                  TABURAN SKOR
+                </span>
+
+              </span>
+
+              <span class="text-xs text-slate-400 font-normal">
+                Peratusan (%)
+              </span>
+
+            </h3>
+
+            <div
+              id="scoreList"
+              class="space-y-3 flex-1 flex flex-col justify-center"
+            >
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROFILE SUMMARY -->
+
+        <div
+          class="glass-panel rounded-3xl p-6 shadow-xl border-l-4 border-l-indigo-500 space-y-4"
+        >
+
+          <div class="flex items-center space-x-3">
+
+            <div class="p-2 bg-indigo-500/20 rounded-xl text-indigo-300">
+
+              <i
+                data-lucide="sparkles"
+                class="w-6 h-6"
+              ></i>
+
+            </div>
+
+            <div>
+
+              <h3 class="text-xl font-bold text-white">
+                ✨ RINGKASAN PROFIL
+              </h3>
+
+              <p class="text-xs text-slate-400">
+                Ringkasan berdasarkan corak pilihan anda dalam permainan.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="profileAnalysisBox"
+            class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-sm leading-relaxed text-slate-200"
+          >
+          </div>
+
+        </div>
+
+
+        <!-- CAREER RECOMMENDATIONS -->
+
+        <div
+          class="glass-panel rounded-3xl p-6 shadow-xl space-y-4"
+        >
+
+          <div class="flex items-center space-x-3">
+
+            <div class="p-2 bg-purple-500/20 rounded-xl text-purple-300">
+
+              <i
+                data-lucide="briefcase"
+                class="w-6 h-6"
+              ></i>
+
+            </div>
+
+            <div>
+
+              <h3 class="text-xl font-bold text-white">
+                💼 BIDANG KERJAYA UNTUK DITEROKAI
+              </h3>
+
+              <p class="text-xs text-slate-400">
+                Pilih bidang di bawah untuk terokai laluan pendidikan dan kemahiran.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="careerFieldsGrid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+          </div>
+
+        </div>
+
+
+        <!-- CAREER DETAIL -->
+
+        <div
+          id="careerDetailBox"
+          class="hidden glass-panel rounded-3xl p-6 border-indigo-500/40 space-y-4 transition-all"
+        >
+
+          <div class="flex justify-between items-start">
+
+            <h4
+              id="cdTitle"
+              class="text-2xl font-black text-indigo-300 flex items-center space-x-2"
+            ></h4>
+
+            <button
+              onclick="closeCareerDetail()"
+              class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"
+            >
+
+              <i data-lucide="x" class="w-5 h-5"></i>
+
+            </button>
+
+          </div>
+
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+
+
+            <!-- JOBS -->
+
+            <div
+              class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-2"
+            >
+
+              <h5
+                class="font-bold text-slate-200 flex items-center space-x-2 text-xs uppercase tracking-wider"
+              >
+
+                <i
+                  data-lucide="user-check"
+                  class="w-4 h-4 text-emerald-400"
+                ></i>
+
+                <span>
+                  Contoh Pekerjaan
+                </span>
+
+              </h5>
+
+              <ul
+                id="cdJobs"
+                class="list-disc list-inside text-slate-300 space-y-1"
+              ></ul>
+
+            </div>
+
+
+            <!-- SKILLS -->
+
+            <div
+              class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-2"
+            >
+
+              <h5
+                class="font-bold text-slate-200 flex items-center space-x-2 text-xs uppercase tracking-wider"
+              >
+
+                <i
+                  data-lucide="sparkles"
+                  class="w-4 h-4 text-amber-400"
+                ></i>
+
+                <span>
+                  Kemahiran Diperlukan
+                </span>
+
+              </h5>
+
+              <ul
+                id="cdSkills"
+                class="list-disc list-inside text-slate-300 space-y-1"
+              ></ul>
+
+            </div>
+
+
+            <!-- SUBJECTS -->
+
+            <div
+              class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-2"
+            >
+
+              <h5
+                class="font-bold text-slate-200 flex items-center space-x-2 text-xs uppercase tracking-wider"
+              >
+
+                <i
+                  data-lucide="book-open"
+                  class="w-4 h-4 text-blue-400"
+                ></i>
+
+                <span>
+                  Subjek Berkaitan
+                </span>
+
+              </h5>
+
+              <ul
+                id="cdSubjects"
+                class="list-disc list-inside text-slate-300 space-y-1"
+              ></ul>
+
+            </div>
+
+
+            <!-- COURSES -->
+
+            <div
+              class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-2"
+            >
+
+              <h5
+                class="font-bold text-slate-200 flex items-center space-x-2 text-xs uppercase tracking-wider"
+              >
+
+                <i
+                  data-lucide="award"
+                  class="w-4 h-4 text-purple-400"
+                ></i>
+
+                <span>
+                  Laluan Kursus
+                </span>
+
+              </h5>
+
+              <ul
+                id="cdCourses"
+                class="list-disc list-inside text-slate-300 space-y-1"
+              ></ul>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RESTART -->
+
+        <div class="text-center pt-4 pb-8">
+
+          <button
+            onclick="restartGame()"
+            class="inline-flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-6 py-3 rounded-xl border border-slate-700 transition-all text-sm font-semibold"
+          >
+
+            <i
+              data-lucide="rotate-ccw"
+              class="w-4 h-4"
+            ></i>
+
+            <span>
+              Main Semula
+            </span>
+
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+
+  <!-- =========================================================
+       SITUATION MODAL
+  ========================================================== -->
+
+  <div
+    id="situationModal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50"
+  >
+
+    <div
+      class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-6 border-indigo-500/40 shadow-2xl transform transition-all scale-95 opacity-0 duration-200"
+      id="modalCard"
+    >
+
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+
+        <span
+          id="modalTypeBadge"
+          class="px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1.5"
+        ></span>
+
+        <span class="text-xs text-slate-400 font-mono">
+          PILIHAN KERJAYA
+        </span>
+
+      </div>
+
+
+      <div class="space-y-3">
+
+        <h3
+          id="modalSituationTitle"
+          class="text-lg font-bold text-white flex items-center space-x-2"
+        ></h3>
+
+        <p
+          id="modalSituationText"
+          class="text-sm sm:text-base text-slate-200 leading-relaxed bg-slate-900/60 p-4 rounded-2xl border border-slate-800"
+        ></p>
+
+      </div>
+
+
+      <div class="space-y-2.5">
+
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          Pilih Tindakan Anda:
+        </p>
+
+        <div
+          id="modalOptionsContainer"
+          class="space-y-2"
+        ></div>
+
+      </div>
+
+
+      <p class="text-[11px] text-slate-400 italic text-center">
+        * Tiada jawapan betul atau salah. Pilih mengikut naluri dan minat peribadi anda.
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+<script>
+
+/* ============================================================
+   PLAYER STATE
+============================================================ */
+
+let player = {
+  name: "",
+  form: "",
+  position: 0,
+
+  scores: {
+    R: 0,
+    I: 0,
+    A: 0,
+    S: 0,
+    E: 0,
+    C: 0
+  },
+
+  choicesHistory: []
+};
+
+
+/* ============================================================
+   BOARD TILES
+============================================================ */
+
+const BOARD_TILES = [
+
+  {
+    id: 0,
+    type: "START",
+    label: "START",
+    color: "bg-indigo-600",
+    text: "text-white"
+  },
+
+  {
+    id: 1,
+    type: "R",
+    label: "R",
+    name: "Realistic",
+    color: "bg-red-500/20",
+    border: "border-red-500/40",
+    text: "text-red-400"
+  },
+
+  {
+    id: 2,
+    type: "I",
+    label: "I",
+    name: "Investigative",
+    color: "bg-blue-500/20",
+    border: "border-blue-500/40",
+    text: "text-blue-400"
+  },
+
+  {
+    id: 3,
+    type: "A",
+    label: "A",
+    name: "Artistic",
+    color: "bg-emerald-500/20",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400"
+  },
+
+  {
+    id: 4,
+    type: "S",
+    label: "S",
+    name: "Social",
+    color: "bg-amber-500/20",
+    border: "border-amber-500/40",
+    text: "text-amber-400"
+  },
+
+  {
+    id: 5,
+    type: "E",
+    label: "E",
+    name: "Enterprising",
+    color: "bg-purple-500/20",
+    border: "border-purple-500/40",
+    text: "text-purple-400"
+  },
+
+  {
+    id: 6,
+    type: "C",
+    label: "C",
+    name: "Conventional",
+    color: "bg-pink-500/20",
+    border: "border-pink-500/40",
+    text: "text-pink-400"
+  },
+
+  {
+    id: 7,
+    type: "E",
+    label: "E",
+    name: "Enterprising",
+    color: "bg-purple-500/20",
+    border: "border-purple-500/40",
+    text: "text-purple-400"
+  },
+
+  {
+    id: 8,
+    type: "R",
+    label: "R",
+    name: "Realistic",
+    color: "bg-red-500/20",
+    border: "border-red-500/40",
+    text: "text-red-400"
+  },
+
+  {
+    id: 9,
+    type: "I",
+    label: "I",
+    name: "Investigative",
+    color: "bg-blue-500/20",
+    border: "border-blue-500/40",
+    text: "text-blue-400"
+  },
+
+  {
+    id: 10,
+    type: "A",
+    label: "A",
+    name: "Artistic",
+    color: "bg-emerald-500/20",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400"
+  },
+
+  {
+    id: 11,
+    type: "S",
+    label: "S",
+    name: "Social",
+    color: "bg-amber-500/20",
+    border: "border-amber-500/40",
+    text: "text-amber-400"
+  },
+
+  {
+    id: 12,
+    type: "S",
+    label: "S",
+    name: "Social",
+    color: "bg-amber-500/20",
+    border: "border-amber-500/40",
+    text: "text-amber-400"
+  },
+
+  {
+    id: 13,
+    type: "C",
+    label: "C",
+    name: "Conventional",
+    color: "bg-pink-500/20",
+    border: "border-pink-500/40",
+    text: "text-pink-400"
+  },
+
+  {
+    id: 14,
+    type: "E",
+    label: "E",
+    name: "Enterprising",
+    color: "bg-purple-500/20",
+    border: "border-purple-500/40",
+    text: "text-purple-400"
+  },
+
+  {
+    id: 15,
+    type: "R",
+    label: "R",
+    name: "Realistic",
+    color: "bg-red-500/20",
+    border: "border-red-500/40",
+    text: "text-red-400"
+  },
+
+  {
+    id: 16,
+    type: "I",
+    label: "I",
+    name: "Investigative",
+    color: "bg-blue-500/20",
+    border: "border-blue-500/40",
+    text: "text-blue-400"
+  },
+
+  {
+    id: 17,
+    type: "A",
+    label: "A",
+    name: "Artistic",
+    color: "bg-emerald-500/20",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400"
+  },
+
+  {
+    id: 18,
+    type: "A",
+    label: "A",
+    name: "Artistic",
+    color: "bg-emerald-500/20",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400"
+  },
+
+  {
+    id: 19,
+    type: "S",
+    label: "S",
+    name: "Social",
+    color: "bg-amber-500/20",
+    border: "border-amber-500/40",
+    text: "text-amber-400"
+  },
+
+  {
+    id: 20,
+    type: "C",
+    label: "C",
+    name: "Conventional",
+    color: "bg-pink-500/20",
+    border: "border-pink-500/40",
+    text: "text-pink-400"
+  },
+
+  {
+    id: 21,
+    type: "E",
+    label: "E",
+    name: "Enterprising",
+    color: "bg-purple-500/20",
+    border: "border-purple-500/40",
+    text: "text-purple-400"
+  },
+
+  {
+    id: 22,
+    type: "R",
+    label: "R",
+    name: "Realistic",
+    color: "bg-red-500/20",
+    border: "border-red-500/40",
+    text: "text-red-400"
+  },
+
+  {
+    id: 23,
+    type: "FINISH",
+    label: "FINISH",
+    color: "bg-emerald-600",
+    text: "text-white"
+  }
+
+];
+
+
+/* ============================================================
+   RIASEC QUESTIONS
+============================================================ */
+
+const SITUATIONS = {
+
+  R: [
+
+    {
+      title: "🔧 Realistic Scenario",
+
+      question:
+        "Basikal atau alatan sukan anda mengalami kerosakan rantai atau komponen. Apa tindakan utama anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Cuba membaiki dan membukanya sendiri menggunakan peralatan.",
+
+          trait: "R",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Mencari maklumat atau manual secara dalam talian tentang cara membaikinya.",
+
+          trait: "I",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Meminta bantuan rakan atau orang lain untuk selesaikan bersama.",
+
+          trait: "S",
+          points: 2
+        }
+
+      ]
+    },
+
+
+    {
+      title: "🔨 Hands-on Task",
+
+      question:
+        "Sekolah mengadakan pameran sains dan teknologi. Apakah bahagian yang paling anda ingin kendalikan?",
+
+      options: [
+
+        {
+          text:
+            "A. Memasang struktur fizikal, mesin atau alatan elektronik pameran.",
+
+          trait: "R",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Menganalisis data projek dan menerangkan teori di sebaliknya.",
+
+          trait: "I",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Mereka bentuk poster visual dan persembahan yang menarik.",
+
+          trait: "A",
+          points: 2
+        }
+
+      ]
+    }
+
+  ],
+
+
+  I: [
+
+    {
+      title: "🔎 Investigative Mystery",
+
+      question:
+        "Terdapat masalah sistem komputer sekolah yang tiba-tiba perlahan atau berlaku gangguan aplikasi. Apa pendekatan anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Menyiasat punca kod, menyemak data sistem dan mencari penyelesaian.",
+
+          trait: "I",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Memimpin jawatankuasa murid untuk menguruskan aduan dan cadangan.",
+
+          trait: "E",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Mengemas kini dokumen serta menyusun jadual penyelenggaraan.",
+
+          trait: "C",
+          points: 2
+        }
+
+      ]
+    },
+
+
+    {
+      title: "🧬 Science & Research",
+
+      question:
+        "Anda diberikan tugasan projek sains mengenai perubahan iklim tempatan. Apa langkah pertama anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Membaca jurnal, menganalisis statistik dan mengkaji graf pembolehubah.",
+
+          trait: "I",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Mencipta video pendek kreatif atau infografik berunsur seni.",
+
+          trait: "A",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Menganjurkan kempen kesedaran komuniti bersama rakan sekolah.",
+
+          trait: "S",
+          points: 2
+        }
+
+      ]
+    }
+
+  ],
+
+
+  A: [
+
+    {
+      title: "🎨 Artistic Creativity",
+
+      question:
+        "Kelab sekolah ingin melancarkan logo dan jersi baharu. Apakah sumbangan utama anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Menghasilkan idea design visual, lakaran seni dan susunan warna.",
+
+          trait: "A",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Menjual jersi tersebut dan menguruskan promosi perniagaan kelab.",
+
+          trait: "E",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Menguruskan borang tempahan, saiz dan senarai semak pesanan.",
+
+          trait: "C",
+          points: 2
+        }
+
+      ]
+    },
+
+
+    {
+      title: "🎭 Creative Expression",
+
+      question:
+        "Anda diberikan pentas percuma dalam perhimpunan sekolah. Apakah yang ingin anda persembahkan?",
+
+      options: [
+
+        {
+          text:
+            "A. Persembahan muzik, drama kreatif atau rekaan grafik digital.",
+
+          trait: "A",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Ucapan motivasi untuk membimbing dan membantu pelajar lain.",
+
+          trait: "S",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Projek gajet fizikal yang dibina sendiri.",
+
+          trait: "R",
+          points: 2
+        }
+
+      ]
+    }
+
+  ],
+
+
+  S: [
+
+    {
+      title: "🤝 Social Guidance",
+
+      question:
+        "Rakan anda menghadapi kesukaran memahami subjek pelajaran sebelum peperiksaan. Apakah tindakan anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Melapangkan masa untuk mengajar dan memberi sokongan moral.",
+
+          trait: "S",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Menyediakan jadual ulang kaji teratur dan nota berstruktur.",
+
+          trait: "C",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Meminta mereka mencari jawapan sendiri dalam buku latihan.",
+
+          trait: "I",
+          points: 2
+        }
+
+      ]
+    },
+
+
+    {
+      title: "👥 Community Service",
+
+      question:
+        "Sekolah menganjurkan Program Khidmat Masyarakat. Apakah peranan pilihan anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Berinteraksi terus dengan penduduk dan mengajar kanak-kanak.",
+
+          trait: "S",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Membaiki fasiliti awam seperti mengecat dan kerja pertukangan.",
+
+          trait: "R",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Menjadi pengarah program dan membuat keputusan utama organisasi.",
+
+          trait: "E",
+          points: 2
+        }
+
+      ]
+    }
+
+  ],
+
+
+  E: [
+
+    {
+      title: "💼 Enterprising Leadership",
+
+      question:
+        "Kelas anda ingin mengumpul dana bagi lawatan sambil belajar. Apa idea anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Menjual produk atau perkhidmatan dan memimpin strategi jualan kelas.",
+
+          trait: "E",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Menguruskan rekod akaun dan simpanan resit secara teliti.",
+
+          trait: "C",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Mereka poster pengiklanan yang estetik untuk media sosial.",
+
+          trait: "A",
+          points: 2
+        }
+
+      ]
+    },
+
+
+    {
+      title: "🚀 Entrepreneurial Pitch",
+
+      question:
+        "Pertandingan Inovasi Usahawan Muda dibuka. Apakah peranan utama yang anda ambil?",
+
+      options: [
+
+        {
+          text:
+            "A. Menjadi pembentang utama untuk meyakinkan juri dan pelabur.",
+
+          trait: "E",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Menguji dan mengkaji aspek kebolehlaksanaan teknikal produk.",
+
+          trait: "I",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Membina model fizikal prototaip menggunakan alatan pertukangan.",
+
+          trait: "R",
+          points: 2
+        }
+
+      ]
+    }
+
+  ],
+
+
+  C: [
+
+    {
+      title: "📋 Conventional Organization",
+
+      question:
+        "Projek kumpulan menghadapi masalah kerana maklumat beraburan dan jadual tidak teratur. Bagaimana anda membantu?",
+
+      options: [
+
+        {
+          text:
+            "A. Menyusun fail data, membuat checklist dan jadual tepat.",
+
+          trait: "C",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Mengambil alih kepimpinan dan mengagihkan tugas secara tegas.",
+
+          trait: "E",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Mencari jawapan kajian baharu yang lebih mendalam.",
+
+          trait: "I",
+          points: 2
+        }
+
+      ]
+    },
+
+
+    {
+      title: "📊 Data & Administration",
+
+      question:
+        "Dalam satu acara sukan sekolah, tugas manakah yang paling selesa bagi anda?",
+
+      options: [
+
+        {
+          text:
+            "A. Mencatat mata kedudukan, pendaftaran dan skor data rasmi.",
+
+          trait: "C",
+          points: 2
+        },
+
+        {
+          text:
+            "B. Menjadi pengacara majlis yang memberi semangat kepada penonton.",
+
+          trait: "S",
+          points: 2
+        },
+
+        {
+          text:
+            "C. Menjadi atlet dalam pertandingan fizikal di padang.",
+
+          trait: "R",
+          points: 2
+        }
+
+      ]
+    }
+
+  ]
+
+};
+
+
+/* ============================================================
+   CAREER DATABASE
+============================================================ */
+
+const CAREER_DATABASE = {
+
+  R: {
+    category: "Engineering & Technical Services",
+    icon: "settings",
+    color: "text-red-400 border-red-500/30 bg-red-500/10",
+    traitsLabel: "Realistic + Investigative",
+
+    jobs: [
+      "Mechanical Engineer",
+      "Civil Engineer",
+      "Electrical Engineer",
+      "Aerospace Engineer",
+      "Technician Specialist"
+    ],
+
+    skills: [
+      "Problem solving",
+      "Mathematics",
+      "Technical & Mechanical skills",
+      "Hands-on execution"
+    ],
+
+    subjects: [
+      "Mathematics",
+      "Physics",
+      "Additional Mathematics",
+      "Design & Technology"
+    ],
+
+    courses: [
+      "Diploma / Degree in Mechanical Engineering",
+      "Diploma in Mechatronics",
+      "Degree in Civil Engineering"
+    ]
+  },
+
+
+  I: {
+    category: "Research, Data & Pure Sciences",
+    icon: "microscope",
+    color: "text-blue-400 border-blue-500/30 bg-blue-500/10",
+    traitsLabel: "Investigative + Analytical",
+
+    jobs: [
+      "Data Scientist",
+      "Software Developer / AI Engineer",
+      "Medical Researcher",
+      "Biotechnologist",
+      "Chemist"
+    ],
+
+    skills: [
+      "Critical thinking",
+      "Data analysis",
+      "Coding & Logic",
+      "Scientific inquiry"
+    ],
+
+    subjects: [
+      "Biology",
+      "Chemistry",
+      "Physics",
+      "Additional Mathematics",
+      "Computer Science"
+    ],
+
+    courses: [
+      "Degree in Computer Science / AI",
+      "Degree in Data Analytics",
+      "Degree in Biomedical Science"
+    ]
+  },
+
+
+  A: {
+    category: "Creative Arts, Design & Media",
+    icon: "palette",
+    color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    traitsLabel: "Artistic + Expressive",
+
+    jobs: [
+      "UI/UX Designer",
+      "Graphic Designer / Animator",
+      "Architect",
+      "Content Creator / Copywriter",
+      "Multimedia Producer"
+    ],
+
+    skills: [
+      "Creative thinking",
+      "Visual design",
+      "Storytelling",
+      "Digital tool mastery"
+    ],
+
+    subjects: [
+      "Pendidikan Seni Visual",
+      "English / Bahasa Melayu",
+      "Computer Graphics",
+      "Literature"
+    ],
+
+    courses: [
+      "Diploma / Degree in Graphic Design",
+      "Degree in Architecture",
+      "Diploma in Creative Multimedia"
+    ]
+  },
+
+
+  S: {
+    category: "Education, Health & Human Services",
+    icon: "heart-handshake",
+    color: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+    traitsLabel: "Social + Helping",
+
+    jobs: [
+      "School Counselor / Psychologist",
+      "Teacher / Educator",
+      "Nurse / Allied Health Professional",
+      "Social Worker",
+      "HR Specialist"
+    ],
+
+    skills: [
+      "Empathy",
+      "Communication & Active Listening",
+      "Teamwork",
+      "Problem resolution"
+    ],
+
+    subjects: [
+      "Bahasa Melayu / English",
+      "Biology",
+      "Pendidikan Moral / Islam",
+      "History"
+    ],
+
+    courses: [
+      "Degree in Education",
+      "Degree in Psychology",
+      "Diploma in Nursing / Health Science"
+    ]
+  },
+
+
+  E: {
+    category: "Business, Management & Leadership",
+    icon: "trending-up",
+    color: "text-purple-400 border-purple-500/30 bg-purple-500/10",
+    traitsLabel: "Enterprising + Persuasive",
+
+    jobs: [
+      "Entrepreneur / Startup Founder",
+      "Marketing Manager",
+      "Business Analyst",
+      "Sales Executive",
+      "Project Manager"
+    ],
+
+    skills: [
+      "Leadership",
+      "Public speaking",
+      "Strategic planning",
+      "Negotiation & Persuasion"
+    ],
+
+    subjects: [
+      "Prinsip Perakaunan",
+      "Perniagaan",
+      "Ekonomi",
+      "Mathematics",
+      "English"
+    ],
+
+    courses: [
+      "Degree in Business Administration",
+      "Diploma in Marketing",
+      "Degree in Entrepreneurship"
+    ]
+  },
+
+
+  C: {
+    category: "Administration, Finance & Logistics",
+    icon: "file-spreadsheet",
+    color: "text-pink-400 border-pink-500/30 bg-pink-500/10",
+    traitsLabel: "Conventional + Systematic",
+
+    jobs: [
+      "Chartered Accountant",
+      "Database Administrator",
+      "Financial Analyst",
+      "Logistics Coordinator",
+      "Compliance Officer"
+    ],
+
+    skills: [
+      "Attention to detail",
+      "Numerical accuracy",
+      "Organization & System management",
+      "Record keeping"
+    ],
+
+    subjects: [
+      "Prinsip Perakaunan",
+      "Mathematics",
+      "Ekonomi",
+      "Information Technology"
+    ],
+
+    courses: [
+      "Degree in Accounting",
+      "Diploma in Office Management",
+      "Degree in Finance / Banking"
+    ]
+  }
+
+};
+
+
+/* ============================================================
+   INITIALIZATION
+============================================================ */
+
+window.onload = function() {
+
+  lucide.createIcons();
+
+  renderBoardGrid();
+
+};
+
+
+/* ============================================================
+   START GAME
+============================================================ */
+
+function handleStartGame(e) {
+
+  e.preventDefault();
+
+  const nameInput =
+    document.getElementById("playerName").value.trim();
+
+  const formInput =
+    document.getElementById("playerForm").value.trim();
+
+  if (!nameInput) {
+    return;
+  }
+
+  player.name = nameInput;
+  player.form = formInput;
+
+  document.getElementById("badgeName").innerText =
+    player.name;
+
+  if (player.form) {
+
+    document.getElementById("badgeForm").innerText =
+      `• ${player.form}`;
+
+  }
+
+  document
+    .getElementById("playerBadge")
+    .classList
+    .remove("hidden");
+
+
+  document
+    .getElementById("screenStart")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("screenBoard")
+    .classList
+    .remove("hidden");
+
+
+  lucide.createIcons();
+
+  updateBoardUI();
+
+}
+
+
+/* ============================================================
+   BOARD RENDER
+============================================================ */
+
+function renderBoardGrid() {
+
+  const grid =
+    document.getElementById("boardGrid");
+
+  grid.innerHTML = "";
+
+  BOARD_TILES.forEach((tile, index) => {
+
+    const tileDiv =
+      document.createElement("div");
+
+    tileDiv.id = `tile-${index}`;
+
+    tileDiv.className =
+      `relative flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl border transition-all duration-300 min-h-[75px] sm:min-h-[90px] ${tile.color} ${tile.border || "border-indigo-500/40"}`;
+
+
+    if (
+      tile.type === "START" ||
+      tile.type === "FINISH"
+    ) {
+
+      tileDiv.innerHTML = `
+
+        <span class="text-xs sm:text-sm font-black tracking-widest ${tile.text}">
+          ${tile.label}
+        </span>
+
+        <div
+          id="avatar-container-${index}"
+          class="absolute inset-0 flex items-center justify-center pointer-events-none"
+        ></div>
+
+      `;
+
+    } else {
+
+      tileDiv.innerHTML = `
+
+        <span class="text-xs font-semibold text-slate-400">
+          #${index}
+        </span>
+
+        <span class="text-lg sm:text-xl font-extrabold ${tile.text}">
+          ${tile.label}
+        </span>
+
+        <span class="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate max-w-full">
+          ${tile.name}
+        </span>
+
+        <div
+          id="avatar-container-${index}"
+          class="absolute inset-0 flex items-center justify-center pointer-events-none"
+        ></div>
+
+      `;
+
+    }
+
+    grid.appendChild(tileDiv);
+
+  });
+
+
+  renderAvatarAt(player.position);
+
+}
+
+
+/* ============================================================
+   AVATAR
+============================================================ */
+
+function renderAvatarAt(pos) {
+
+  BOARD_TILES.forEach((_, idx) => {
+
+    const container =
+      document.getElementById(
+        `avatar-container-${idx}`
+      );
+
+    if (container) {
+      container.innerHTML = "";
+    }
+
+    const tileEl =
+      document.getElementById(`tile-${idx}`);
+
+    if (tileEl) {
+      tileEl.classList.remove("tile-active");
+    }
+
+  });
+
+
+  const activeTile =
+    document.getElementById(`tile-${pos}`);
+
+  if (activeTile) {
+    activeTile.classList.add("tile-active");
+  }
+
+
+  const targetContainer =
+    document.getElementById(
+      `avatar-container-${pos}`
+    );
+
+  if (targetContainer) {
+
+    targetContainer.innerHTML = `
+
+      <div
+        class="bg-gradient-to-r from-pink-500 to-rose-500 text-white p-1.5 sm:p-2 rounded-full shadow-lg border-2 border-white animate-bounce"
+      >
+
+        <i
+          data-lucide="user-check"
+          class="w-4 h-4 sm:w-5 sm:h-5"
+        ></i>
+
+      </div>
+
+    `;
+
+    lucide.createIcons();
+
+  }
+
+}
+
+
+/* ============================================================
+   DICE
+============================================================ */
+
+let isMoving = false;
+
+
+function rollDice() {
+
+  if (isMoving) {
+    return;
+  }
+
+  const diceBtn =
+    document.getElementById("btnRollDice");
+
+  const diceDisplay =
+    document.getElementById("diceDisplay");
+
+  diceBtn.disabled = true;
+
+  diceDisplay.classList.add(
+    "dice-roll-anim"
+  );
+
+
+  const rollVal =
+    Math.floor(Math.random() * 6) + 1;
+
+
+  setTimeout(() => {
+
+    diceDisplay.classList.remove(
+      "dice-roll-anim"
+    );
+
+    diceDisplay.innerText = rollVal;
+
+    movePlayerStepByStep(rollVal);
+
+  }, 500);
+
+}
+
+
+/* ============================================================
+   PLAYER MOVEMENT
+============================================================ */
+
+function movePlayerStepByStep(steps) {
+
+  isMoving = true;
+
+  let stepsLeft = steps;
+
+
+  const stepInterval =
+    setInterval(() => {
+
+      if (
+        stepsLeft > 0 &&
+        player.position <
+          BOARD_TILES.length - 1
+      ) {
+
+        player.position++;
+
+        renderAvatarAt(
+          player.position
+        );
+
+        stepsLeft--;
+
+      } else {
+
+        clearInterval(stepInterval);
+
+        isMoving = false;
+
+        document
+          .getElementById("btnRollDice")
+          .disabled = false;
+
+        updateBoardUI();
+
+        handleTileLanding(
+          player.position
+        );
+
+      }
+
+    }, 350);
+
+}
+
+
+/* ============================================================
+   UPDATE BOARD UI
+============================================================ */
+
+function updateBoardUI() {
+
+  const currentTile =
+    BOARD_TILES[player.position];
+
+
+  document.getElementById(
+    "currentTileLabel"
+  ).innerText =
+
+    currentTile.type === "START" ||
+    currentTile.type === "FINISH"
+
+      ? currentTile.label
+
+      : `Petak ${player.position}: ${currentTile.name} (${currentTile.type})`;
+
+
+  document.getElementById(
+    "turnsCount"
+  ).innerText =
+    `Petak: ${player.position} / 23`;
+
+
+  document.getElementById(
+    "scoreR"
+  ).innerText = player.scores.R;
+
+  document.getElementById(
+    "scoreI"
+  ).innerText = player.scores.I;
+
+  document.getElementById(
+    "scoreA"
+  ).innerText = player.scores.A;
+
+  document.getElementById(
+    "scoreS"
+  ).innerText = player.scores.S;
+
+  document.getElementById(
+    "scoreE"
+  ).innerText = player.scores.E;
+
+  document.getElementById(
+    "scoreC"
+  ).innerText = player.scores.C;
+
+}
+
+
+/* ============================================================
+   TILE LANDING
+============================================================ */
+
+function handleTileLanding(pos) {
+
+  const tile =
+    BOARD_TILES[pos];
+
+
+  if (tile.type === "FINISH") {
+
+    setTimeout(
+      finishGame,
+      600
+    );
+
+    return;
+  }
+
+
+  if (tile.type === "START") {
+    return;
+  }
+
+
+  const categorySituations =
+    SITUATIONS[tile.type];
+
+
+  if (
+    categorySituations &&
+    categorySituations.length > 0
+  ) {
+
+    const selected =
+      categorySituations[
+        Math.floor(
+          Math.random() *
+          categorySituations.length
+        )
+      ];
+
+
+    openSituationModal(
+      tile.type,
+      selected
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   SITUATION MODAL
+============================================================ */
+
+function openSituationModal(
+  type,
+  situation
+) {
+
+  const modal =
+    document.getElementById(
+      "situationModal"
+    );
+
+  const card =
+    document.getElementById(
+      "modalCard"
+    );
+
+  const badge =
+    document.getElementById(
+      "modalTypeBadge"
+    );
+
+  const title =
+    document.getElementById(
+      "modalSituationTitle"
+    );
+
+  const text =
+    document.getElementById(
+      "modalSituationText"
+    );
+
+  const optionsContainer =
+    document.getElementById(
+      "modalOptionsContainer"
+    );
+
+
+  const tileInfo =
+    BOARD_TILES.find(
+      t => t.type === type
+    );
+
+
+  badge.className =
+    `px-3 py-1 rounded-full text-xs font-bold border ${tileInfo.color} ${tileInfo.border} ${tileInfo.text}`;
+
+
+  badge.innerText =
+    `LOKASI: ${tileInfo.name.toUpperCase()} (${type})`;
+
+
+  title.innerText =
+    situation.title;
+
+  text.innerText =
+    situation.question;
+
+
+  optionsContainer.innerHTML = "";
+
+
+  situation.options.forEach(
+    option => {
+
+      const btn =
+        document.createElement(
+          "button"
+        );
+
+
+      btn.className =
+        "w-full text-left bg-slate-900/90 hover:bg-indigo-600/30 border border-slate-700 hover:border-indigo-500/60 p-3.5 rounded-2xl text-xs sm:text-sm text-slate-200 hover:text-white transition-all duration-200 flex items-start space-x-2 group";
+
+
+      btn.onclick =
+        () => selectOption(option);
+
+
+      btn.innerHTML = `
+
+        <span class="font-medium flex-1">
+          ${option.text}
+        </span>
+
+        <i
+          data-lucide="chevron-right"
+          class="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all shrink-0 mt-0.5"
+        ></i>
+
+      `;
+
+
+      optionsContainer.appendChild(btn);
+
+    }
+  );
+
+
+  lucide.createIcons();
+
+
+  modal.classList.remove("hidden");
+
+  modal.classList.add("flex");
+
+
+  setTimeout(() => {
+
+    card.classList.remove(
+      "scale-95",
+      "opacity-0"
+    );
+
+    card.classList.add(
+      "scale-100",
+      "opacity-100"
+    );
+
+  }, 50);
+
+}
+
+
+/* ============================================================
+   SELECT ANSWER
+============================================================ */
+
+function selectOption(option) {
+
+  player.scores[
+    option.trait
+  ] =
+    (player.scores[
+      option.trait
+    ] || 0) +
+    option.points;
+
+
+  player.choicesHistory.push(
+    option
+  );
+
+
+  updateBoardUI();
+
+
+  const card =
+    document.getElementById(
+      "modalCard"
+    );
+
+
+  card.classList.remove(
+    "scale-100",
+    "opacity-100"
+  );
+
+  card.classList.add(
+    "scale-95",
+    "opacity-0"
+  );
+
+
+  setTimeout(() => {
+
+    const modal =
+      document.getElementById(
+        "situationModal"
+      );
+
+    modal.classList.add("hidden");
+
+    modal.classList.remove("flex");
+
+  }, 200);
+
+}
+
+
+/* ============================================================
+   FINISH GAME
+============================================================ */
+
+function finishGame() {
+
+  confetti({
+
+    particleCount: 100,
+
+    spread: 70,
+
+    origin: {
+      y: 0.6
+    }
+
+  });
+
+
+  document
+    .getElementById("screenBoard")
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById("screenResults")
+    .classList
+    .remove("hidden");
+
+
+  document.getElementById(
+    "resPlayerName"
+  ).innerText =
+    player.name;
+
+
+  renderResultsChartAndList();
+
+  generateProfileSummary();
+
+  renderCareerRecommendations();
+
+  lucide.createIcons();
+
+}
+
+
+/* ============================================================
+   CALCULATE PERCENTAGES
+============================================================ */
+
+function calculatePercentages() {
+
+  const total =
+    Object.values(
+      player.scores
+    ).reduce(
+      (a, b) => a + b,
+      0
+    ) || 1;
+
+
+  const percentages = {};
+
+
+  for (
+    const [key, val]
+    of Object.entries(
+      player.scores
+    )
+  ) {
+
+    percentages[key] =
+      Math.round(
+        (val / total) * 100
+      );
+
+  }
+
+
+  return {
+    total,
+    percentages
+  };
+
+}
+
+
+/* ============================================================
+   CHART
+============================================================ */
+
+let chartInstance = null;
+
+
+function renderResultsChartAndList() {
+
+  const {
+    percentages
+  } =
+    calculatePercentages();
+
+
+  const ctx =
+    document
+      .getElementById(
+        "riasecChart"
+      )
+      .getContext("2d");
+
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+
+  chartInstance =
+    new Chart(ctx, {
+
+      type: "bar",
+
+      data: {
+
+        labels: [
+          "Realistic (R)",
+          "Investigative (I)",
+          "Artistic (A)",
+          "Social (S)",
+          "Enterprising (E)",
+          "Conventional (C)"
+        ],
+
+        datasets: [
+
+          {
+
+            label:
+              "Skor Kecenderungan (%)",
+
+            data: [
+
+              percentages.R || 0,
+              percentages.I || 0,
+              percentages.A || 0,
+              percentages.S || 0,
+              percentages.E || 0,
+              percentages.C || 0
+
+            ],
+
+            backgroundColor: [
+              "#EF4444",
+              "#3B82F6",
+              "#10B981",
+              "#F59E0B",
+              "#8B5CF6",
+              "#EC4899"
+            ],
+
+            borderRadius: 8
+
+          }
+
+        ]
+
+      },
+
+
+      options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+            display: false
+          }
+
+        },
+
+        scales: {
+
+          y: {
+
+            beginAtZero: true,
+
+            max: 100,
+
+            ticks: {
+              color: "#94a3b8"
+            },
+
+            grid: {
+              color:
+                "rgba(148, 163, 184, 0.1)"
+            }
+
+          },
+
+          x: {
+
+            ticks: {
+
+              color: "#94a3b8",
+
+              font: {
+                size: 10
+              }
+
+            },
+
+            grid: {
+              display: false
+            }
+
+          }
+
+        }
+
+      }
+
+    });
+
+
+  /* SCORE LIST */
+
+  const scoreList =
+    document.getElementById(
+      "scoreList"
+    );
+
+
+  scoreList.innerHTML = "";
+
+
+  const labels = [
+
+    {
+      key: "R",
+      name: "Realistic 🔧",
+      color: "bg-red-500"
+    },
+
+    {
+      key: "I",
+      name: "Investigative 🔎",
+      color: "bg-blue-500"
+    },
+
+    {
+      key: "A",
+      name: "Artistic 🎨",
+      color: "bg-emerald-500"
+    },
+
+    {
+      key: "S",
+      name: "Social 🤝",
+      color: "bg-amber-500"
+    },
+
+    {
+      key: "E",
+      name: "Enterprising 💼",
+      color: "bg-purple-500"
+    },
+
+    {
+      key: "C",
+      name: "Conventional 📋",
+      color: "bg-pink-500"
+    }
+
+  ];
+
+
+  labels.sort(
+    (a, b) =>
+      (percentages[b.key] || 0) -
+      (percentages[a.key] || 0)
+  );
+
+
+  labels.forEach(item => {
+
+    const pct =
+      percentages[item.key] || 0;
+
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+
+    row.className =
+      "space-y-1";
+
+
+    row.innerHTML = `
+
+      <div class="flex justify-between text-xs font-semibold">
+
+        <span class="text-slate-200">
+          ${item.name}
+        </span>
+
+        <span class="text-indigo-300 font-bold">
+          ${pct}%
+        </span>
+
+      </div>
+
+
+      <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+
+        <div
+          class="${item.color} h-full rounded-full transition-all duration-1000"
+          style="width: ${pct}%"
+        ></div>
+
+      </div>
+
+    `;
+
+
+    scoreList.appendChild(row);
+
+  });
+
+}
+
+
+/* ============================================================
+   TOP TRAITS
+============================================================ */
+
+function getTopTraits() {
+
+  const sorted =
+    Object.entries(
+      player.scores
+    ).sort(
+      ([, a], [, b]) =>
+        b - a
+    );
+
+
+  return [
+    sorted[0][0],
+    sorted[1][0]
+  ];
+
+}
+
+
+/* ============================================================
+   LOCAL PROFILE SUMMARY
+============================================================ */
+
+function generateProfileSummary() {
+
+  const top =
+    getTopTraits();
+
+
+  const traitNames = {
+
+    R:
+      "Realistic (Praktikal & Fizikal)",
+
+    I:
+      "Investigative (Analitis & Penyelidikan)",
+
+    A:
+      "Artistic (Kreatif & Ekspresif)",
+
+    S:
+      "Social (Membantu & Mengajar)",
+
+    E:
+      "Enterprising (Kepimpinan & Jualan)",
+
+    C:
+      "Conventional (Teratur & Data)"
+
+  };
+
+
+  const descriptions = {
+
+    R:
+      "Anda menunjukkan kecenderungan terhadap aktiviti praktikal, penggunaan alatan, kerja teknikal dan penyelesaian masalah secara hands-on.",
+
+    I:
+      "Anda menunjukkan kecenderungan terhadap penyiasatan, analisis, logik, data dan penerokaan ilmu.",
+
+    A:
+      "Anda menunjukkan kecenderungan terhadap kreativiti, reka bentuk, ekspresi diri dan penghasilan idea baharu.",
+
+    S:
+      "Anda menunjukkan kecenderungan terhadap membantu orang lain, komunikasi, pengajaran dan kerja berpasukan.",
+
+    E:
+      "Anda menunjukkan kecenderungan terhadap kepimpinan, keusahawanan, pembentangan dan membuat keputusan.",
+
+    C:
+      "Anda menunjukkan kecenderungan terhadap organisasi, ketelitian, data, sistem dan kerja yang tersusun."
+
+  };
+
+
+  const box =
+    document.getElementById(
+      "profileAnalysisBox"
+    );
+
+
+  box.innerHTML = `
+
+    <p class="mb-3">
+
+      Berdasarkan pilihan anda sepanjang permainan,
+      dua kecenderungan RIASEC yang mendapat skor tertinggi ialah
+
+      <strong class="text-indigo-300">
+        ${traitNames[top[0]]}
+      </strong>
+
+      dan
+
+      <strong class="text-purple-300">
+        ${traitNames[top[1]]}
+      </strong>.
+
+    </p>
+
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+      <div class="bg-slate-800/60 rounded-xl p-3">
+
+        <p class="font-bold text-indigo-300 text-xs mb-1">
+          ${top[0]} — ${traitNames[top[0]]}
+        </p>
+
+        <p class="text-xs text-slate-300">
+          ${descriptions[top[0]]}
+        </p>
+
+      </div>
+
+
+      <div class="bg-slate-800/60 rounded-xl p-3">
+
+        <p class="font-bold text-purple-300 text-xs mb-1">
+          ${top[1]} — ${traitNames[top[1]]}
+        </p>
+
+        <p class="text-xs text-slate-300">
+          ${descriptions[top[1]]}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <p class="text-xs text-slate-400 mt-3">
+
+      Keputusan ini merupakan gambaran kecenderungan minat
+      berdasarkan pilihan dalam permainan, bukan penentuan muktamad
+      tentang kerjaya anda. Anda boleh meneroka pelbagai bidang
+      sebelum membuat pilihan pendidikan atau kerjaya.
+
+    </p>
+
+  `;
+
+}
+
+
+/* ============================================================
+   CAREER RECOMMENDATIONS
+============================================================ */
+
+function renderCareerRecommendations() {
+
+  const top =
+    getTopTraits();
+
+
+  const grid =
+    document.getElementById(
+      "careerFieldsGrid"
+    );
+
+
+  grid.innerHTML = "";
+
+
+  const featuredTypes =
+    Array.from(
+      new Set([
+        top[0],
+        top[1],
+        "I",
+        "E"
+      ])
+    ).slice(0, 3);
+
+
+  featuredTypes.forEach(
+    type => {
+
+      const data =
+        CAREER_DATABASE[type];
+
+
+      if (!data) {
+        return;
+      }
+
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        `glass-panel rounded-2xl p-5 border cursor-pointer hover:border-indigo-400 transition-all duration-200 transform hover:-translate-y-1 ${data.color}`;
+
+
+      card.onclick =
+        () => showCareerDetail(type);
+
+
+      card.innerHTML = `
+
+        <div class="flex items-center space-x-3 mb-3">
+
+          <div class="p-2.5 rounded-xl bg-slate-900/60">
+
+            <i
+              data-lucide="${data.icon}"
+              class="w-6 h-6"
+            ></i>
+
+          </div>
+
+
+          <div>
+
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              ${data.traitsLabel}
+            </span>
+
+            <h4 class="font-bold text-white text-base leading-tight">
+              ${data.category}
+            </h4>
+
+          </div>
+
+        </div>
+
+
+        <p class="text-xs text-slate-300 mb-3">
+
+          Contoh kerjaya:
+          ${data.jobs.slice(0, 3).join(", ")}.
+
+        </p>
+
+
+        <div class="flex items-center text-xs font-bold text-indigo-300">
+
+          <span>
+            Terokai Laluan Pendidikan
+          </span>
+
+          <i
+            data-lucide="arrow-right"
+            class="w-4 h-4 ml-1"
+          ></i>
+
+        </div>
+
+      `;
+
+
+      grid.appendChild(card);
+
+    }
+  );
+
+
+  lucide.createIcons();
+
+}
+
+
+/* ============================================================
+   CAREER DETAIL
+============================================================ */
+
+function showCareerDetail(type) {
+
+  const data =
+    CAREER_DATABASE[type];
+
+
+  if (!data) {
+    return;
+  }
+
+
+  document.getElementById(
+    "cdTitle"
+  ).innerHTML = `
+
+    <i
+      data-lucide="${data.icon}"
+      class="w-7 h-7 text-indigo-400"
+    ></i>
+
+    <span>
+      ${data.category}
+    </span>
+
+  `;
+
+
+  fillList(
+    "cdJobs",
+    data.jobs
+  );
+
+  fillList(
+    "cdSkills",
+    data.skills
+  );
+
+  fillList(
+    "cdSubjects",
+    data.subjects
+  );
+
+  fillList(
+    "cdCourses",
+    data.courses
+  );
+
+
+  const detailBox =
+    document.getElementById(
+      "careerDetailBox"
+    );
+
+
+  detailBox.classList.remove(
+    "hidden"
+  );
+
+
+  detailBox.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest"
+  });
+
+
+  lucide.createIcons();
+
+}
+
+
+/* ============================================================
+   FILL LIST
+============================================================ */
+
+function fillList(
+  elementId,
+  items
+) {
+
+  const ul =
+    document.getElementById(
+      elementId
+    );
+
+
+  ul.innerHTML =
+    items
+      .map(
+        item => `<li>${item}</li>`
+      )
+      .join("");
+
+}
+
+
+/* ============================================================
+   CLOSE CAREER DETAIL
+============================================================ */
+
+function closeCareerDetail() {
+
+  document
+    .getElementById(
+      "careerDetailBox"
+    )
+    .classList
+    .add("hidden");
+
+}
+
+
+/* ============================================================
+   RESTART GAME
+============================================================ */
+
+function restartGame() {
+
+  player.position = 0;
+
+
+  player.scores = {
+
+    R: 0,
+    I: 0,
+    A: 0,
+    S: 0,
+    E: 0,
+    C: 0
+
+  };
+
+
+  player.choicesHistory = [];
+
+
+  document
+    .getElementById(
+      "screenResults"
+    )
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById(
+      "screenStart"
+    )
+    .classList
+    .remove("hidden");
+
+
+  document
+    .getElementById(
+      "careerDetailBox"
+    )
+    .classList
+    .add("hidden");
+
+
+  document.getElementById(
+    "playerName"
+  ).value = "";
+
+  document.getElementById(
+    "playerForm"
+  ).value = "";
+
+
+  document
+    .getElementById(
+      "playerBadge"
+    )
+    .classList
+    .add("hidden");
+
+
+  renderBoardGrid();
+
+  updateBoardUI();
+
+}
+
+
+/* ============================================================
+   END
+============================================================ */
+
+</script>
+
+</body>
+</html>
